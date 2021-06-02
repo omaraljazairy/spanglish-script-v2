@@ -1,5 +1,4 @@
-.test_env
-.dev_env
+.env
 __pycache__
 .pytest_cache
 logs/*.log
