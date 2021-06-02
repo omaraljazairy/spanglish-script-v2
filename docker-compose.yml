@@ -1,0 +1,58 @@
+version: "3.7"
+
+services: 
+  python:
+    build: .
+    container_name: scriptspanglish-script-v2-python
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+      - .env:/app/.env
+    command: tail -f /dev/null
+    networks:
+      - network-spanglish-script-v2
+    environment: 
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    links:
+      - 'mysql'
+    depends_on:
+      - mysql
+  mysql:
+    container_name: mysql-spanglish-script-v2
+    image: mysql:latest
+    ports:
+      - '3309:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD} # dockerpass
+    volumes:
+      - type: volume
+        source: mysql-data
+        target: /var/lib/mysql
+    networks:
+      network-spanglish-script-v2:
+        ipv4_address: ${DB_HOST}
+  phpmyadmin:
+    container_name: phpmyadmin-spanglish-script-v2
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    networks:
+      - network-spanglish-script-v2
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=${DB_USER}
+      - PMA_PASSWORD=${DB_PASSWORD} # dockerpass
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+volumes: 
+    mysql-data:
+    db-data:
+networks:
+    network-spanglish-script-v2:
+      ipam:
+        driver: default
+        config:
+          - subnet: 170.27.0.0/16
