@@ -1,5 +1,5 @@
-# from configs.db import db_conn
-from typing import TypeVar
+from dataclasses import dataclass
+from typing import TypeVar, List
 from datetime import datetime
 
 Word = TypeVar('Word')
@@ -7,36 +7,40 @@ Word = TypeVar('Word')
 responsible for the word data model object and the interaction with the 
 word table in the database.
 """
+@dataclass
+class Word:
+
+    word: str
+    category_id: int
+    id: int = None
+    created: datetime = datetime.now()
 
 
-
-class WordModel:
-
-    def __init__(self, id: int, word: str, category_id: int) -> None:
-        """
-        set three attributes, id, word and category_id to should be initialized.
-        the conn attribute and the created will be automatically initialized and available for
-        all functions. 
-        """
-        
-        self.id = id
-        self.word = word
-        self.category_id = category_id
-        self.created = datetime.now()
-        # self.dbconn = db_conn()
-
-
-    def set_word(word:str, category_id:str) -> int:
+    def save(self) -> Word:
         """ 
-        takes the word name and the category_id as arguments and returns the id 
-        generated if successful, otherwise an exception will be raised.
+        takes the word object returns the generated word if successful, 
+        otherwise None will be returned.
         """
 
-        return 1
+        return self
+
 
     @staticmethod
-    def get_word(id: int) -> Word:
-        """ takes an int and returns the word object if found, otherwise """
+    def fetch(id: int) -> Word:
+        """ 
+        takes an int of the wordId and returns the word object if found, otherwise None
+        will be returned. 
+        """
 
-        return Word(id, 'Verb')
+        return Word(id=id, word='Hola', category_id=1, created=datetime.now())
+
+
+    @staticmethod
+    def fetch_all() -> List[Word]:
+        """ 
+        takes no arguments and returns a list of Word objects or 
+        empty list. 
+        """
+
+        return [Word(id=id, word='Hola', category_id=1, created=datetime.now()),]
 

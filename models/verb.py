@@ -1,59 +1,54 @@
-# from configs.db import db_conn
-from typing import TypeVar
+from dataclasses import dataclass
+from typing import TypeVar, List
 from datetime import datetime
-from .word import WordModel
 
-VerbModel = TypeVar('VerbModel')
+Verb = TypeVar('Verb')
 """
 responsible for the verb data model object and the interaction with the 
 verb table in the database.
 """
 
 
+@dataclass
+class Verb:
 
-class VerbModel(WordModel):
-
-    def __init__(
-        self, 
-        word: WordModel, 
-        yo: str = None, 
-        tu: str = None,
-        usted: str = None,
-        nosotros: str = None,
-        vosotros: str = None,
-        ustedes: str = None,
-        id: int = None,
-        tense: str = 'present'
-        ) -> None:
-        """
-        set eight attributes, word, yo, tu, useted, nosotros, vosotros, usetedes should be initialized.
-        the conn attribute will be automatically initialized and available for
-        all functions. 
-        """
-        
-        self.id = id
-        self.word = word
-        self.yo = yo
-        self.tu = tu
-        self.usted = usted
-        self.nosotros = nosotros
-        self.vosotros = vosotros
-        self.ustedes = ustedes
-        self.tense = tense
-        # self.dbconn = db_conn()
+    word_id: int
+    yo: str = None
+    tu: str = None
+    usted: str = None
+    nosotros: str = None
+    vosotros: str = None
+    ustedes: str = None
+    id: int = None
+    tense: str = 'present'
+    created: datetime = datetime.now()
 
 
-    def set_verb(self) -> int:
+    def save(self) -> Verb:
         """ 
-        takes the verbmodel object as arguments and returns the id after inserting it
-        if successful, otherwise an exception will be raised.
+        takes the verb object returns the generated verb if successful, 
+        otherwise None will be returned.
         """
 
-        return 1
+        return self
+
 
     @staticmethod
-    def get_verb(verb_id: int = None, word_id = None) -> VerbModel:
-        """ takes the verb id or word id as int and returns the VerbModel object if found, otherwise """
+    def fetch(id: int) -> Verb:
+        """ 
+        takes an int of the verbId and returns the verb object if found, otherwise None
+        will be returned. 
+        """
 
-        return True
+        return Verb(id=id, word_id=2, yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now())
+
+
+    @staticmethod
+    def fetch_all() -> List[Verb]:
+        """ 
+        takes no arguments and returns a list of Verb objects or 
+        empty list. 
+        """
+
+        return [Verb(id=id, word_id=2, yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now()),]
 

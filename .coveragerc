@@ -2,12 +2,12 @@
 source = .
 omit =
     # omit some files
-    quizapp.py
-    editor.py
-    setup.py
-    config.py
-    db.py
+    app.py
+    mydataclass.py
     
+    # omit files in the configs directory
+    configs/**
+
     # omit everything in /tests    
     tests/**
 

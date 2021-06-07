@@ -1,5 +1,7 @@
 # from configs.db import db_conn
-from typing import TypeVar
+from models.modelinterface import ModelInterface
+from dataclasses import dataclass
+from typing import TypeVar, List
 from datetime import datetime
 
 Sentence = TypeVar('Sentence')
@@ -9,34 +11,40 @@ sentence table in the database.
 """
 
 
+@dataclass
+class Sentence(ModelInterface):
 
-class SentenceModel:
-
-    def __init__(self, id: int, sentence: str, category_id: int) -> None:
-        """
-        set three attributes, id, sentence and category_id to should be initialized.
-        the conn attribute and the created will be automatically initialized and available for
-        all functions. 
-        """
-        
-        self.id = id
-        self.sentence = sentence
-        self.category_id = category_id
-        self.created = datetime.now()
-        # self.dbconn = db_conn()
+    sentence: str
+    category_id: int
+    id: int = None
+    created: datetime = datetime.now() # default value is now
 
 
-    def set_sentence(sentence:str, category_id:str) -> int:
+    def save(self) -> Sentence:
         """ 
-        takes the sentence name and the category_id as arguments and returns the id 
-        generated if successful, otherwise an exception will be raised.
+        takes the sentence object returns the generated sentence if successful, 
+        otherwise None will be returned.
         """
 
-        return 1
+        return self
+
 
     @staticmethod
-    def get_sentence(id: int) -> Sentence:
-        """ takes an int and returns the sentence object if found, otherwise """
+    def fetch(id: int) -> Sentence:
+        """ 
+        takes an int and returns the sentence object if found, otherwise None
+        will be returned. 
+        """
 
-        return Sentence(id, 'Verb')
+        return Sentence(id=id, sentence='Hola amigo', category_id=1, created=datetime.now())
+
+
+    @staticmethod
+    def fetch_all() -> List[Sentence]:
+        """ 
+        takes no arguments and returns a list of Sentence objects or 
+        empty list. 
+        """
+
+        return [Sentence(id=id, sentence='Hola amigo', category_id=1, created=datetime.now()),]
 

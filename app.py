@@ -9,13 +9,19 @@ from configs.log import LOGGING
 logging.config.dictConfig(LOGGING)
 #logger = 'processor' if os.getenv('ENVIRONMENT') != 'TEST' else 'test'
 logger = logging.getLogger('app')
-from configs.db import db_conn
+from services.dbconnection import DBConnection
+# from configs.db import db_conn
 
 class App:
+    '''The main view app to access the application. '''
 
     def __init__(self) -> None:
-        self.dbconn = db_conn()
-        print("App is initialized")
+        """ initialize the database connection here. """
+        # initialize the database connection
+        dbconn = DBConnection()
+        self.conn = dbconn.get_connection()
+        #self.dbconn = db_conn()
+
 
 
 if __name__ == '__main__':
