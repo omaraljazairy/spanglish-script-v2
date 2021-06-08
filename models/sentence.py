@@ -1,6 +1,7 @@
 # from configs.db import db_conn
 from models.modelinterface import ModelInterface
 from dataclasses import dataclass
+from models.category import Category
 from typing import TypeVar, List
 from datetime import datetime
 
@@ -15,7 +16,7 @@ sentence table in the database.
 class Sentence(ModelInterface):
 
     sentence: str
-    category_id: int
+    category: Category
     id: int = None
     created: datetime = datetime.now() # default value is now
 
@@ -36,7 +37,7 @@ class Sentence(ModelInterface):
         will be returned. 
         """
 
-        return Sentence(id=id, sentence='Hola amigo', category_id=1, created=datetime.now())
+        return Sentence(id=id, sentence='Hola amigo', category=Category(category='greeting', id=1, created=datetime.now()), created=datetime.now())
 
 
     @staticmethod
@@ -46,5 +47,5 @@ class Sentence(ModelInterface):
         empty list. 
         """
 
-        return [Sentence(id=id, sentence='Hola amigo', category_id=1, created=datetime.now()),]
+        return [Sentence(id=id, sentence='Hola amigo', category=Category(category='greeting', id=1, created=datetime.now()), created=datetime.now()),]
 

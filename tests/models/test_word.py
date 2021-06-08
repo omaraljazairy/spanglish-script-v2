@@ -1,6 +1,7 @@
 import unittest
 import logging
 from models.word import Word
+from models.category import Category
 from datetime import datetime
 
 
@@ -11,6 +12,7 @@ class WordModelTest(unittest.TestCase):
         """ setup data before tests. """
         
         cls.logger = logging.getLogger('test')
+        cls.category = Category(category='greeting', id=1, created=datetime.now())
         cls.logger.info("Setup %s Model", cls.__name__)
 
 
@@ -20,14 +22,14 @@ class WordModelTest(unittest.TestCase):
         when an instance is created.
         """
 
-        word = Word(id=1, word='Hola', category_id=1)
+        word = Word(id=1, word='Hola', category=self.category)
         total_instance_attr = word.__dict__
 
         self.assertEqual(len(total_instance_attr), 4)
 
         self.assertTrue(word.id == 1)
         self.assertTrue(word.word == 'Hola')
-        self.assertTrue(word.category_id == 1)
+        self.assertTrue(word.category.id == 1)
         self.assertEqual(type(word.created), datetime)
 
     def test_save(self):
@@ -36,12 +38,13 @@ class WordModelTest(unittest.TestCase):
         be created and returned. 
         """
 
-        word = Word(word='llamar', category_id=2)
+        word = Word(word='llamar', category=self.category)
         saved_word = word.save()
 
         self.logger.debug("saved word: %s", saved_word)
 
         self.assertIsInstance(saved_word, Word)
+        self.assertIsInstance(saved_word.category, Category)
 
 
     def test_fetch_word(self):
@@ -55,6 +58,7 @@ class WordModelTest(unittest.TestCase):
         self.logger.debug("returned word: %s", word)
 
         self.assertIsInstance(word, Word)
+        self.assertIsInstance(word.category, Category)
 
 
     def test_fetch_all(self):

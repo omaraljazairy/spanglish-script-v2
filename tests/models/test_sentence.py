@@ -1,6 +1,7 @@
 import unittest
 import logging
 from models.sentence import Sentence
+from models.category import Category
 from datetime import datetime
 
 class SentenceModelTest(unittest.TestCase):
@@ -10,6 +11,7 @@ class SentenceModelTest(unittest.TestCase):
         """ setup data before tests. """
         
         cls.logger = logging.getLogger('test')
+        cls.category = Category(category='greeting', id=1, created=datetime.now())
         cls.logger.info("Setup %s Model", cls.__name__)
         
 
@@ -19,7 +21,7 @@ class SentenceModelTest(unittest.TestCase):
         when an instance is created.
         """
 
-        sentence = Sentence(sentence='Hola amiga', category_id=1)
+        sentence = Sentence(sentence='Hola amiga', category=self.category)
         total_instance_attr = sentence.__dict__
 
         self.logger.debug("category: %s", sentence)
@@ -29,14 +31,14 @@ class SentenceModelTest(unittest.TestCase):
         self.assertEqual(len(total_instance_attr), 4)
         self.assertTrue(sentence.id == None)
         self.assertTrue(sentence.sentence == 'Hola amiga')
-        self.assertTrue(sentence.category_id == 1)
+        self.assertTrue(sentence.category.id == 1)
         self.assertEqual(type(sentence.created), datetime)
 
     
     def test_save(self):
         """ provide a sentence name and expect a Sentence object to be returned. """
 
-        sentence = Sentence(sentence='que dia es hoy', category_id=2)
+        sentence = Sentence(sentence='que dia es hoy', category=self.category)
         saved_sentence = sentence.save()
 
         self.logger.debug("saved sentence: %s", saved_sentence)
@@ -55,6 +57,7 @@ class SentenceModelTest(unittest.TestCase):
         self.logger.debug("returned sentence: %s", sentence)
 
         self.assertIsInstance(sentence, Sentence)
+        self.assertIsInstance(sentence.category, Category)
 
 
     def test_fetch_all(self):

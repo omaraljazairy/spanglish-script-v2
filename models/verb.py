@@ -1,6 +1,9 @@
+from models.modelinterface import ModelInterface
 from dataclasses import dataclass
+from models.category import Category
 from typing import TypeVar, List
 from datetime import datetime
+from models.word import Word
 
 Verb = TypeVar('Verb')
 """
@@ -10,9 +13,9 @@ verb table in the database.
 
 
 @dataclass
-class Verb:
+class Verb(ModelInterface):
 
-    word_id: int
+    word: Word
     yo: str = None
     tu: str = None
     usted: str = None
@@ -40,7 +43,7 @@ class Verb:
         will be returned. 
         """
 
-        return Verb(id=id, word_id=2, yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now())
+        return Verb(id=id, word=Word(id=2, word='ir', category=Category(category='verb', id=2, created=datetime.now()), created=datetime.now()), yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now())
 
 
     @staticmethod
@@ -50,5 +53,5 @@ class Verb:
         empty list. 
         """
 
-        return [Verb(id=id, word_id=2, yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now()),]
+        return [Verb(id=id, word=Word(id=2, word='ir', category=Category(category='verb', id=2, created=datetime.now()), created=datetime.now()), yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now()),]
 

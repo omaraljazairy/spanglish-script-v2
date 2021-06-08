@@ -1,3 +1,5 @@
+from models.modelinterface import ModelInterface
+from models.category import Category
 from dataclasses import dataclass
 from typing import TypeVar, List
 from datetime import datetime
@@ -8,10 +10,10 @@ responsible for the word data model object and the interaction with the
 word table in the database.
 """
 @dataclass
-class Word:
+class Word(ModelInterface):
 
     word: str
-    category_id: int
+    category: Category
     id: int = None
     created: datetime = datetime.now()
 
@@ -32,7 +34,7 @@ class Word:
         will be returned. 
         """
 
-        return Word(id=id, word='Hola', category_id=1, created=datetime.now())
+        return Word(id=id, word='Hola', category=Category(category='greeting', id=1, created=datetime.now()), created=datetime.now())
 
 
     @staticmethod
@@ -42,5 +44,5 @@ class Word:
         empty list. 
         """
 
-        return [Word(id=id, word='Hola', category_id=1, created=datetime.now()),]
+        return [Word(id=id, word='Hola', category=Category(category='greeting', id=1, created=datetime.now()), created=datetime.now()),]
 

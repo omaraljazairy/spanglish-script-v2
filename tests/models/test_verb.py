@@ -1,5 +1,7 @@
 import unittest
 from models.verb import Verb
+from models.word import Word
+from models.category import Category
 import logging
 from datetime import datetime
 
@@ -11,6 +13,7 @@ class VerbModelTest(unittest.TestCase):
         """ setup data before tests. """
         
         cls.logger = logging.getLogger('test')
+        cls.word = Word(word='ir', category=Category(category='verb', id=2, created=datetime.now()), created=datetime.now(), id=2)
         cls.logger.info("Setup %s Model", cls.__name__)
 
 
@@ -22,7 +25,7 @@ class VerbModelTest(unittest.TestCase):
 
         verb = Verb(
             id=None,
-            word_id=2, 
+            word=self.word, 
             yo='voy', 
             tu='vas', 
             usted='va',
@@ -38,7 +41,7 @@ class VerbModelTest(unittest.TestCase):
         self.assertEqual(len(total_instance_attr), 10)
 
         self.assertFalse(verb.id == False)
-        self.assertEqual(verb.word_id, 2)
+        self.assertEqual(verb.word.id, 2)
         self.assertTrue(verb.yo == 'voy')
         self.assertTrue(verb.tu == 'vas')
         self.assertEqual(verb.usted, 'va')
@@ -52,7 +55,7 @@ class VerbModelTest(unittest.TestCase):
         be created and returned. 
         """
 
-        verb = Verb(id=1, word_id=2, yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now())
+        verb = Verb(id=1, word=self.word, yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now())
         saved_verb = verb.save()
 
         self.logger.debug("saved verb: %s", saved_verb)
@@ -71,6 +74,7 @@ class VerbModelTest(unittest.TestCase):
         self.logger.debug("returned verb: %s", verb)
 
         self.assertIsInstance(verb, Verb)
+        self.assertIsInstance(verb.word, Word)
 
 
     def test_fetch_all(self):
