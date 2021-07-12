@@ -1,4 +1,4 @@
-from models.modelinterface import ModelInterface
+from models.basemodel import BaseModel
 from dataclasses import dataclass
 from models.category import Category
 from typing import TypeVar, List
@@ -13,7 +13,7 @@ verb table in the database.
 
 
 @dataclass
-class Verb(ModelInterface):
+class Verb(BaseModel):
 
     word: Word
     yo: str = None
@@ -25,6 +25,12 @@ class Verb(ModelInterface):
     id: int = None
     tense: str = 'present'
     created: datetime = datetime.now()
+
+
+    def __post_init__(self):
+        """This is only for dataclasses. It will be executed after the 
+        automatic default init """
+        super().__init__()
 
 
     def save(self) -> Verb:

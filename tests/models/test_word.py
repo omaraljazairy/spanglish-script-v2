@@ -23,9 +23,9 @@ class WordModelTest(unittest.TestCase):
         """
 
         word = Word(id=1, word='Hola', category=self.category)
-        total_instance_attr = word.__dict__
+        instance_attr = word.__dict__
 
-        self.assertEqual(len(total_instance_attr), 4)
+        self.assertEqual(len(instance_attr), 6)
 
         self.assertTrue(word.id == 1)
         self.assertTrue(word.word == 'Hola')

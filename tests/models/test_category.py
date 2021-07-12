@@ -1,6 +1,6 @@
+from datetime import datetime
 import unittest
 import logging
-from datetime import datetime
 from models.category import Category
 
 class CategoryTest(unittest.TestCase):
@@ -20,13 +20,13 @@ class CategoryTest(unittest.TestCase):
         """
 
         category = Category('Day')
-        total_instance_attr = category.__dict__
+        instance_attr = category.__dict__
 
         self.logger.debug("category: %s", category)
-        self.logger.debug("total_instance_attr: %s", total_instance_attr)
+        self.logger.debug("instance_attr: %s", instance_attr)
         self.logger.debug("mro of the category class: %s", Category.__mro__)
 
-        self.assertEqual(len(total_instance_attr), 3)
+        self.assertEqual(len(instance_attr), 5)
 
         self.assertTrue(category.id == None)
         self.assertTrue(category.category == 'Day')
@@ -68,6 +68,33 @@ class CategoryTest(unittest.TestCase):
 
         self.assertEqual(type(category_list), list)
         self.assertTrue(len(category_list) > 0)
+
+
+    def test_convert_db_to_object(self):
+        """ provide a list of category and expect to get back a Category object. """
+
+        data = [{
+            'category': 'foo',
+            'id' : 1,
+            'created': '2021-06-22 22:56:01'
+        },
+        {
+            'category': 'bar',
+            'id' : 2,
+            'created': '2021-06-22 22:58:01'
+        }]
+
+        converted_categories = Category.convert_dict_to_object(category_list=data)
+        
+
+        self.logger.debug("converted_categories: %s", converted_categories)
+
+        self.assertAlmostEqual(len(converted_categories), 2)
+
+
+        
+        
+
 
 
 

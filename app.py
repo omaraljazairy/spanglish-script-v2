@@ -10,6 +10,7 @@ logging.config.dictConfig(LOGGING)
 #logger = 'processor' if os.getenv('ENVIRONMENT') != 'TEST' else 'test'
 logger = logging.getLogger('app')
 from services.dbconnection import DBConnection
+from controllers.editorcontroller import EditorController
 # from configs.db import db_conn
 
 class App:
@@ -18,8 +19,9 @@ class App:
     def __init__(self) -> None:
         """ initialize the database connection here. """
         # initialize the database connection
-        dbconn = DBConnection()
-        self.conn = dbconn.get_connection()
+        # dbconn = DBConnection()
+        # self.conn = dbconn.get_connection()
+        EditorController()
         #self.dbconn = db_conn()
 
 

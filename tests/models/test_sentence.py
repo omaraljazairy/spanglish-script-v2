@@ -22,13 +22,13 @@ class SentenceModelTest(unittest.TestCase):
         """
 
         sentence = Sentence(sentence='Hola amiga', category=self.category)
-        total_instance_attr = sentence.__dict__
+        instance_attr = sentence.__dict__
 
         self.logger.debug("category: %s", sentence)
-        self.logger.debug("total_instance_attr: %s", total_instance_attr)
+        self.logger.debug("instance_attr: %s", instance_attr)
         self.logger.debug("mro of the category class: %s", Sentence.__mro__)
         
-        self.assertEqual(len(total_instance_attr), 4)
+        self.assertEqual(len(instance_attr), 6)
         self.assertTrue(sentence.id == None)
         self.assertTrue(sentence.sentence == 'Hola amiga')
         self.assertTrue(sentence.category.id == 1)

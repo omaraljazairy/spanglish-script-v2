@@ -1,4 +1,4 @@
-# from dataclasses import dataclass
+from typing import Any
 import logging
 from mysql.connector import Error, pooling
 from datetime import datetime
@@ -13,6 +13,14 @@ logger.debug("environment from db: %s", ENV)
 #@dataclass(frozen=True) # make sure the instance attributes are immutable
 class DBConnection:
     """ Singletom DataClass holding the database connection. """
+    instance = None
+
+    def __new__(cls) -> Any:
+        if cls.instance is None:
+            cls.instance = super().__new__(DBConnection)
+            return cls.instance
+        return cls.instance
+
 
     def __init__(self) -> None:
         self.user = os.getenv('DB_USER')

@@ -1,5 +1,4 @@
-# from configs.db import db_conn
-from models.modelinterface import ModelInterface
+from models.basemodel import BaseModel
 from dataclasses import dataclass
 from typing import TypeVar, List
 from datetime import datetime
@@ -10,7 +9,7 @@ This dataclass is responsible for the Language data model object and the
 interaction with the Language table in the database.
 """
 @dataclass
-class Language(ModelInterface):
+class Language(BaseModel):
     """
     has two attributes, language and id. language is the only required
     attribute to be set when initializing the object.
@@ -20,6 +19,9 @@ class Language(ModelInterface):
     code: str
     id: int = None
     created: datetime = datetime.now()
+
+    def __post_init__(self):
+        super().__init__()
 
 
     def save(self) -> Language:

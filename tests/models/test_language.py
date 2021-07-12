@@ -21,13 +21,13 @@ class LanguageTest(unittest.TestCase):
         """
 
         language = self.language
-        total_instance_attr = language.__dict__
+        instance_attr = language.__dict__
 
         self.logger.debug("language: %s", language)
-        self.logger.debug("total_instance_attr: %s", total_instance_attr)
+        self.logger.debug("instance_attr: %s", instance_attr)
         self.logger.debug("mro of the language class: %s", Language.__mro__)
 
-        self.assertEqual(len(total_instance_attr), 4)
+        self.assertEqual(len(instance_attr), 6)
 
         self.assertTrue(language.id == None)
         self.assertTrue(language.name == 'English')

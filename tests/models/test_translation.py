@@ -35,13 +35,13 @@ class TranslationTest(unittest.TestCase):
         """
 
         tranlsation = self.translation_word
-        total_instance_attr = tranlsation.__dict__
+        instance_attr = tranlsation.__dict__
 
         self.logger.debug("translation: %s", tranlsation)
-        self.logger.debug("total_instance_attr: %s", total_instance_attr)
+        self.logger.debug("instance_attr: %s", instance_attr)
         self.logger.debug("mro of the translation class: %s", Translation.__mro__)
 
-        self.assertEqual(len(total_instance_attr), 6)
+        self.assertEqual(len(instance_attr), 8)
 
         self.assertTrue(tranlsation.id == 1)
         self.assertTrue(tranlsation.word.id == 1)

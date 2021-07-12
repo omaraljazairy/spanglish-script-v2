@@ -36,9 +36,9 @@ class VerbModelTest(unittest.TestCase):
             created=datetime.now()
             )
         
-        total_instance_attr = verb.__dict__
+        instance_attr = verb.__dict__
 
-        self.assertEqual(len(total_instance_attr), 10)
+        self.assertEqual(len(instance_attr), 12)
 
         self.assertFalse(verb.id == False)
         self.assertEqual(verb.word.id, 2)

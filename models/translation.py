@@ -1,4 +1,4 @@
-from models.modelinterface import ModelInterface
+from models.basemodel import BaseModel
 from models.category import Category
 from models.word import Word
 from models.sentence import Sentence
@@ -13,7 +13,7 @@ responsible for the word data model object and the interaction with the
 word table in the database.
 """
 @dataclass
-class Translation(ModelInterface):
+class Translation(BaseModel):
 
     language: Language
     translation: str
@@ -21,6 +21,10 @@ class Translation(ModelInterface):
     sentence: Sentence = None
     id: int = None
     created: datetime = datetime.now()
+
+
+    def __post_init__(self):
+        super().__init__()
 
 
     def save(self) -> Translation:

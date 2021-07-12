@@ -5,7 +5,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': "[%(asctime)s] %(levelname)s [%(process)d:%(name)s:%(lineno)s] - [%(module)s:%(funcName)s] %(message)s",
+            'format': "[%(asctime)s] %(levelname)s [%(process)d-%(thread)d:%(name)s:%(lineno)s] - [%(module)s:%(funcName)s] %(message)s",
             'datefmt': "%d/%b/%Y %H:%M:%S"
         },
     },
