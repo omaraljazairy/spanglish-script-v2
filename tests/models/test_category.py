@@ -26,7 +26,7 @@ class CategoryTest(unittest.TestCase):
         self.logger.debug("instance_attr: %s", instance_attr)
         self.logger.debug("mro of the category class: %s", Category.__mro__)
 
-        self.assertEqual(len(instance_attr), 5)
+        self.assertEqual(len(instance_attr), 4)
 
         self.assertTrue(category.id == None)
         self.assertTrue(category.category == 'Day')
@@ -53,7 +53,7 @@ class CategoryTest(unittest.TestCase):
 
         self.logger.debug("returned category: %s", category)
 
-        self.assertIsInstance(category, Category)
+        self.assertIsInstance(category, dict)
 
 
     def test_fetch_all(self):
@@ -70,7 +70,7 @@ class CategoryTest(unittest.TestCase):
         self.assertTrue(len(category_list) > 0)
 
 
-    def test_convert_db_to_object(self):
+    def test_convert_db_dict_to_object(self):
         """ provide a list of category and expect to get back a Category object. """
 
         data = [{
@@ -84,12 +84,11 @@ class CategoryTest(unittest.TestCase):
             'created': '2021-06-22 22:58:01'
         }]
 
-        converted_categories = Category.convert_dict_to_object(category_list=data)
-        
-
+        converted_categories = [Category.convert_dict_to_object(data=cat) for cat in data]
         self.logger.debug("converted_categories: %s", converted_categories)
 
         self.assertAlmostEqual(len(converted_categories), 2)
+        self.assertIsInstance(converted_categories[0], Category)
 
 
         

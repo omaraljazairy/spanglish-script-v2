@@ -91,5 +91,73 @@ class VerbModelTest(unittest.TestCase):
         self.assertTrue(len(verb_list) > 0)
 
 
+    def test_convert_db_dict_to_object(self):
+        """ provide a list of verb dictionaries and expect to get back a 
+        list of Verb objects. 
+        """
+
+        data = [
+            {
+                'id': 1,
+                'yo': 'voy',
+                'tu': 'vas',
+                'usted': 'va',
+                'nosotros': 'vamos',
+                'vosotros': 'vais',
+                'ustedes': 'van',
+                'created': '2021-06-22 22:58:01',
+                'word': {
+                    'word': 'ir',
+                    'id': 1,
+                    'created': '2021-06-22 22:56:01',
+                    'category': {
+                        'category': 'verb',
+                        'id' : 1,
+                        'created': '2021-06-22 22:56:01'
+                    },
+                    'language': {
+                        'name': 'Spanish',
+                        'id' : 2,
+                        'code': 'ES',
+                        'created': '2021-06-22 22:58:01'
+                    }
+                },
+            },
+            {
+                'id': 2,
+                'yo': 'veo',
+                'tu': 'ves',
+                'usted': 've',
+                'nosotros': 'vemos',
+                'vosotros': 'veis',
+                'ustedes': 'ven',
+                'created': '2021-06-22 22:58:01',
+                'word': {
+                    'word': 'ver',
+                    'id': 3,
+                    'created': '2021-06-22 22:56:01',
+                    'category': {
+                        'category': 'verb',
+                        'id' : 1,
+                        'created': '2021-06-22 22:56:01'
+                    },
+                    'language': {
+                        'name': 'Spanish',
+                        'id' : 2,
+                        'code': 'ES',
+                        'created': '2021-06-22 22:58:01'
+                    }
+                },
+            }
+        ]
+
+        converted_verb = [Verb.convert_dict_to_object(data=verb) for verb in data]
+        self.logger.debug("converted_verb: %s", converted_verb)
+
+        self.assertAlmostEqual(len(converted_verb), 2)
+        self.assertIsInstance(converted_verb[0], Verb)
+
+
+
 if __name__ == '__main__':
     unittest.main()

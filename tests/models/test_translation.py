@@ -41,7 +41,7 @@ class TranslationTest(unittest.TestCase):
         self.logger.debug("instance_attr: %s", instance_attr)
         self.logger.debug("mro of the translation class: %s", Translation.__mro__)
 
-        self.assertEqual(len(instance_attr), 8)
+        self.assertEqual(len(instance_attr), 7)
 
         self.assertTrue(tranlsation.id == 1)
         self.assertTrue(tranlsation.word.id == 1)
@@ -55,7 +55,7 @@ class TranslationTest(unittest.TestCase):
 
         self.logger.debug("saved translation: %s", saved_translation)
 
-        self.assertIsInstance(saved_translation, Translation)
+        self.assertIsInstance(saved_translation, int)
 
 
     def test_fetch_translation(self):
@@ -68,7 +68,7 @@ class TranslationTest(unittest.TestCase):
 
         self.logger.debug("returned translation: %s", translation)
 
-        self.assertIsInstance(translation, Translation)
+        self.assertIsInstance(translation, dict)
 
 
     def test_fetch_all(self):
@@ -83,6 +83,77 @@ class TranslationTest(unittest.TestCase):
 
         self.assertEqual(type(translation_list), list)
         self.assertTrue(len(translation_list) > 0)
+
+    
+    def test_convert_db_dict_to_object(self):
+        """ provide a list of translation dictionaries and expect to get back a 
+        list of translation objects. 
+        """
+
+        data = [
+            {
+                'translation': 'Hello',
+                'created': '2021-06-22 22:58:01',
+                'id': 1,
+                'word': {
+                    'word': 'Hola',
+                    'id': 1,
+                    'created': '2021-06-22 22:56:01',
+                    'category': {
+                        'category': 'foo',
+                        'id' : 1,
+                        'created': '2021-06-22 22:56:01'
+                    },
+                    'language': {
+                        'name': 'Spanish',
+                        'id' : 2,
+                        'code': 'ES',
+                        'created': '2021-06-22 22:58:01'
+                    }
+                },
+                'language': {
+                    'name': 'English',
+                    'id' : 1,
+                    'code': 'EN',
+                    'created': '2021-06-22 22:58:01'
+                }
+            },
+            {
+                'translation': 'Hello Friend',
+                'created': '2021-06-22 22:58:01',
+                'id': 2,
+                'sentence': {
+                    'sentence': 'Hola amigo',
+                    'id': 1,
+                    'created': '2021-06-22 22:56:01',
+                    'category': {
+                        'category': 'foo',
+                        'id' : 1,
+                        'created': '2021-06-22 22:56:01'
+                    },
+                    'language': {
+                        'name': 'Spanish',
+                        'id' : 2,
+                        'code': 'ES',
+                        'created': '2021-06-22 22:58:01'
+                    }
+                },
+                'language': {
+                    'name': 'English',
+                    'id' : 1,
+                    'code': 'EN',
+                    'created': '2021-06-22 22:58:01'
+                }
+            }
+        ]
+
+        converted_translations = [Translation.convert_dict_to_object(data=tra) for tra in data]
+        self.logger.debug("converted_translations: %s", converted_translations)
+
+        self.assertAlmostEqual(len(converted_translations), 2)
+        self.assertIsInstance(converted_translations[0], Translation)
+
+
 
 
 

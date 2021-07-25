@@ -57,8 +57,7 @@ class WordModelTest(unittest.TestCase):
 
         self.logger.debug("returned word: %s", word)
 
-        self.assertIsInstance(word, Word)
-        self.assertIsInstance(word.category, Category)
+        self.assertIsInstance(word, dict)
 
 
     def test_fetch_all(self):
@@ -73,6 +72,52 @@ class WordModelTest(unittest.TestCase):
 
         self.assertEqual(type(word_list), list)
         self.assertTrue(len(word_list) > 0)
+
+
+    def test_convert_db_dict_to_object(self):
+        """ provide a list of words dictionaries and expect to get back a 
+        list of Word objects. 
+        """
+
+        data = [
+            {
+                'word': 'Hola',
+                'id': 1,
+                'created': '2021-06-22 22:56:01',
+                'category': {
+                    'category': 'foo',
+                    'id' : 1,
+                    'created': '2021-06-22 22:56:01'
+                },
+                'language': {
+                    'name': 'Spanish',
+                    'id' : 2,
+                    'code': 'ES',
+                    'created': '2021-06-22 22:58:01'
+                }
+            },
+            {
+                'word': 'dia',
+                'id': 2,
+                'created': '2021-06-22 22:57:01',
+                'category': {
+                    'category': 'bar',
+                    'id' : 2,
+                    'created': '2021-06-22 22:58:01'
+                },
+                'language': {
+                    'name': 'English',
+                    'id' : 1,
+                    'code': 'EN',
+                    'created': '2021-06-22 22:56:01'
+                }
+            }]
+
+        converted_words = [Word.convert_dict_to_object(data=word) for word in data]
+        self.logger.debug("converted_words: %s", converted_words)
+
+        self.assertAlmostEqual(len(converted_words), 2)
+        self.assertIsInstance(converted_words[0], Word)
 
 
     @classmethod

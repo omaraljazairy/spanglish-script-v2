@@ -1,7 +1,7 @@
 from models.basemodel import BaseModel
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TypeVar, List, Optional
+from typing import Dict, TypeVar, List, Optional
 
 
 Category = TypeVar('Category')
@@ -35,34 +35,46 @@ class Category(BaseModel):
 
     
     @staticmethod
-    def fetch(id: int) -> Category:
+    def fetch(id: int) -> Dict:
         """ 
         takes an int and returns the Category object if found, 
         otherwise it will return None. 
         """
 
-        return Category(id, 'Verb', datetime.now())
+        data = {
+            'category': 'foo',
+            'id' : id,
+            'created': '2021-06-22 22:56:01'
+        }
+
+        return data
 
     @staticmethod
-    def fetch_all() -> List[Category]:
+    def fetch_all() -> List[Dict]:
         """ 
         takes no argument and returns a list of all Category objects 
         if found, otherwise return an empty list. 
         """
 
-        return [Category(id, 'Verb', datetime.now())]
+        data = [{
+            'category': 'foo',
+            'id' : 1,
+            'created': '2021-06-22 22:56:01'
+        },
+        {
+            'category': 'bar',
+            'id' : 2,
+            'created': '2021-06-22 22:58:01'
+        }]
+
+        return data
+
 
     @staticmethod
-    def convert_dict_to_object(category_list: list) -> List:
-        """ convert the database record into a Category object. """
+    def convert_dict_to_object(data: dict) -> Category:
+        """ convert the database dict record into a Category object. """
 
-        converted_category_list = [] # save the converted categories
-        for data in category_list:
-            category = data['category']
-            id = data['id']
-            created = datetime.strptime(data['created'], '%Y-%m-%d %H:%M:%S')
-            converted_category_list.append(
-                Category(category=category, id=id, created=created)
-            )
-
-        return converted_category_list
+        category = data['category']
+        id = data['id']
+        created = datetime.strptime(data['created'], '%Y-%m-%d %H:%M:%S')
+        return Category(category=category, id=id, created=created)

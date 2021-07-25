@@ -15,12 +15,13 @@ omit =
     *__init__.py
 
 [pytest]
+filterwarnings =
+    ignore::UserWarning
+    ignore:DeprecationWarning
+    ignore:.*U.*mode is deprecated:DeprecationWarning
+addopts = -p no:warnings
 env_override_existing_values = 1
 env_files =
     .env
     .test.env
     .dev.env
-filterwarnings =
-    ignore::UserWarning
-    ignore:DeprecationWarning
-addopts = -p no:warnings

@@ -1,0 +1,6 @@
+WORD='Word'
+VERB='Verb'
+SENTENCE='Sentence'
+LANGUAGE='Language'
+CATEGORY='Category'
+TRANSLATION='Translation'

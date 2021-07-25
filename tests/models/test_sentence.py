@@ -56,8 +56,8 @@ class SentenceModelTest(unittest.TestCase):
 
         self.logger.debug("returned sentence: %s", sentence)
 
-        self.assertIsInstance(sentence, Sentence)
-        self.assertIsInstance(sentence.category, Category)
+        self.assertIsInstance(sentence, dict)
+        # self.assertIsInstance(sentence.category, Category)
 
 
     def test_fetch_all(self):
@@ -72,6 +72,52 @@ class SentenceModelTest(unittest.TestCase):
 
         self.assertEqual(type(sentence_list), list)
         self.assertTrue(len(sentence_list) > 0)
+
+
+    def test_convert_db_dict_to_object(self):
+        """ provide a list of sentence dictionaries and expect to get back a 
+        list of Sentence objects. 
+        """
+
+        data = [
+            {
+                'sentence': 'Hola amigo',
+                'id': 1,
+                'created': '2021-06-22 22:56:01',
+                'category': {
+                    'category': 'foo',
+                    'id' : 1,
+                    'created': '2021-06-22 22:56:01'
+                },
+                'language': {
+                    'name': 'Spanish',
+                    'id' : 2,
+                    'code': 'ES',
+                    'created': '2021-06-22 22:58:01'
+                }
+            },
+            {
+                'sentence': 'Buenos dias',
+                'id': 2,
+                'created': '2021-06-22 22:57:01',
+                'category': {
+                    'category': 'bar',
+                    'id' : 2,
+                    'created': '2021-06-22 22:58:01'
+                },
+                'language': {
+                    'name': 'English',
+                    'id' : 1,
+                    'code': 'EN',
+                    'created': '2021-06-22 22:56:01'
+                }
+            }]
+
+        converted_sentence = [Sentence.convert_dict_to_object(data=sen) for sen in data]
+        self.logger.debug("converted_sentence: %s", converted_sentence)
+
+        self.assertAlmostEqual(len(converted_sentence), 2)
+        self.assertIsInstance(converted_sentence[0], Sentence)
 
 
     @classmethod
