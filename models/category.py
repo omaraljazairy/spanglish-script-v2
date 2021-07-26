@@ -1,4 +1,5 @@
 from models.basemodel import BaseModel
+from models.dbmodel import DBModel
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, TypeVar, List, Optional
@@ -19,53 +20,58 @@ class Category(BaseModel):
     category: str
     id: Optional[int] = None
     created: datetime = datetime.now() # default value is now
-    
+    dbmodel = DBModel()
 
     def __post_init__(self):
         super().__init__()
 
 
-    def save(self) -> Category:
+    @staticmethod
+    def save(category:str) -> bool:
         """ 
-        takes the initialized category model and saves it and returns the Category 
-        generated if successful, otherwise an exception will be raised.
+        take the category name and saves it and returns True 
+        if successfully added, otherwise False.
         """
 
-        return self
+        query = """
+        INSERT IGNORE INTO {} (`name`) VALUES (%s)
+        """.format(Category.tables.CATEGORY)
+        args = (category,)
+        result = Category.dbmodel.insert(sql=query, args=args)
+       
+        return result
+
 
     
     @staticmethod
-    def fetch(id: int) -> Dict:
+    def get_category_by_id(id: int) -> Dict:
         """ 
-        takes an int and returns the Category object if found, 
+        takes an int and returns the Category dict if found, 
         otherwise it will return None. 
         """
 
-        data = {
-            'category': 'foo',
-            'id' : id,
-            'created': '2021-06-22 22:56:01'
-        }
+        query = """ 
+        SELECT * FROM {} WHERE id = %s;
+        """.format(Category.tables.CATEGORY)
+
+        args = (id,)
+        data = Category.dbmodel.fetch(sql=query, args=args)
 
         return data
 
     @staticmethod
-    def fetch_all() -> List[Dict]:
+    def get_all_categories() -> List[Dict]:
         """ 
-        takes no argument and returns a list of all Category objects 
+        takes no argument and returns a list of all Category dicts 
         if found, otherwise return an empty list. 
         """
 
-        data = [{
-            'category': 'foo',
-            'id' : 1,
-            'created': '2021-06-22 22:56:01'
-        },
-        {
-            'category': 'bar',
-            'id' : 2,
-            'created': '2021-06-22 22:58:01'
-        }]
+        query = """ 
+        SELECT * FROM {} WHERE 1;
+        """.format(Category.tables.CATEGORY)
+
+        args = ()
+        data = Category.dbmodel.fetch_all(sql=query, args=args)
 
         return data
 

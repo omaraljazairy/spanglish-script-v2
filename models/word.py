@@ -1,4 +1,6 @@
+import logging
 from models.basemodel import BaseModel
+from models.dbmodel import DBModel
 from models.category import Category
 from models.language import Language
 from dataclasses import dataclass
@@ -6,6 +8,7 @@ from typing import Dict, TypeVar, List
 from datetime import datetime
 
 Word = TypeVar('Word')
+
 """
 responsible for the word data model object and the interaction with the 
 word table in the database.
@@ -18,6 +21,7 @@ class Word(BaseModel):
     language: Language = None
     id: int = None
     created: datetime = datetime.now()
+    dbmodel = DBModel()
 
 
     def __post_init__(self):
@@ -26,41 +30,86 @@ class Word(BaseModel):
         super().__init__()
 
 
-    def save(self) -> int:
+    @staticmethod
+    def save(word:str, language_id:int, category_id:int) -> int:
         """ 
-        takes the word object returns the generated word id if successful, 
-        otherwise None will be returned.
+        takes a word, language_id and category_id and inserts them, returns 
+        back the word_id.
         """
 
-        return self
+        query = """
+        Insert IGNORE into {} (`word`, `language_id`, `category_id`) VALUES (%s, %s, %s)
+        """.format(Word.tables.WORD)
+        args = (word, language_id, category_id)
+        result = Word.dbmodel.insert(sql=query, args=args)
+       
+        return result
 
 
     @staticmethod
-    def fetch(id: int) -> Dict:
+    def get_word_by_id(id:int) -> Dict:
         """ 
-        takes an int of the wordId and returns the word object if found, otherwise None
+        takes an int of the language_id and/or category_id returns the word dict if found, otherwise None
         will be returned. 
         """
 
-        word = {
-            'word': 'Hola',
-            'id': 1,
-            'created': '2021-06-22 22:56:01',
-            'category': {
-                'category': 'foo',
-                'id' : 1,
-                'created': '2021-06-22 22:56:01'
-            },
-            'language': {
-                'name': 'Spanish',
-                'id' : 2,
-                'code': 'ES',
-                'created': '2021-06-22 22:58:01'
-            }
-        }
+        query = """
+        SELECT w.id as id, word, w.created as created, 
+        language_id, l.name as language_name, `iso-639-1`, l.created as language_created, 
+        category_id, c.name as category_name, c.created as category_created 
+        FROM Word AS w 
+        JOIN Category AS c ON (w.category_id = c.id) 
+        JOIN Language AS l ON (w.language_id = l.id) 
+        WHERE w.id = %s;
+        """.format(Word.tables.WORD, Word.tables.CATEGORY, Word.tables.LANGUAGE)
 
+        args = (id,)
+
+        word = Language.dbmodel.fetch(sql=query, args=args)
+        
         return word
 
+
+    @staticmethod
+    def get_words_by_category_language(language_id:int=None, category_id:int = None) -> List[Dict]:
+        """ 
+        takes an int of the language_id and/or category_id returns a list of word dicts if found, otherwise None
+        will be returned. 
+        """
+
+        query = """
+        SELECT w.id as id, word, w.created as created, 
+        language_id, l.name as language_name, `iso-639-1`, l.created as language_created, 
+        category_id, c.name as category_name, c.created as category_created 
+        FROM Word AS w 
+        JOIN Category AS c ON (w.category_id = c.id) 
+        JOIN Language AS l ON (w.language_id = l.id) 
+        WHERE
+        """.format(Word.tables.WORD, Word.tables.CATEGORY, Word.tables.LANGUAGE)
+        where_clause = ""
+        args = []
+        if language_id and category_id:
+            where_clause += " w.language_id = %s and w.category_id = %s "
+            args = (language_id, category_id)
+
+        elif category_id:
+            where_clause += " w.category_id = %s "
+            args = (category_id,)
+
+        elif language_id:
+            where_clause += " w.language_id = %s "
+            args = (language_id,)
+
+        else:
+            return "No language or category provided"
+
+        query = query + where_clause
+        # args = tuple(args)
+
+        word = Language.dbmodel.fetch_all(sql=query, args=args)
+        
+        return word
+        
 
     @staticmethod
     def fetch_all() -> List[Dict]:

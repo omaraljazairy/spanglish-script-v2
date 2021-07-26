@@ -34,30 +34,82 @@ class WordModelTest(unittest.TestCase):
 
     def test_save(self):
         """ 
-        provide a word and a category and expect a Word object to 
-        be created and returned. 
+        provide a word with a category_id and language_id and expect a Word id to 
+        be returned. 
         """
 
-        word = Word(word='llamar', category=self.category)
-        saved_word = word.save()
+        word_id = Word.save(word='martes', language_id=2, category_id=2)
 
-        self.logger.debug("saved word: %s", saved_word)
+        self.logger.debug("saved word_id: %s", word_id)
 
-        self.assertIsInstance(saved_word, Word)
-        self.assertIsInstance(saved_word.category, Category)
+        self.assertIsInstance(word_id, int)
+        self.assertGreater(word_id, 0)
 
 
-    def test_fetch_word(self):
+    def test_get_word_by_id(self):
         """ 
         call the static fetch method and provide the id 1 as argument. expect
         to get back an Word object.
         """
 
-        word = Word.fetch(id = 1)
+        word = Word.get_word_by_id(id=1)
 
         self.logger.debug("returned word: %s", word)
 
         self.assertIsInstance(word, dict)
+        self.assertGreater(len(word.values()), 0)
+
+
+    def test_get_words_by_category(self):
+        """ 
+        call the static fetch method and provide the category_id 1 as argument. expect
+        to get back a list of dicts.
+        """
+
+        word = Word.get_words_by_category_language(category_id=1)
+
+        self.logger.debug("returned word: %s", word)
+
+        self.assertGreater(len(word), 0)
+
+
+    def test_get_words_by_language(self):
+        """ 
+        call the static fetch method and provide the language_id 1 as argument. expect
+        to get back a list of dicts.
+        """
+
+        word = Word.get_words_by_category_language(language_id=2)
+
+        self.logger.debug("returned word: %s", word)
+
+        self.assertGreater(len(word), 0)
+
+
+    def test_get_words_by_language_category(self):
+        """ 
+        call the static fetch method and provide the language_id and category_id as arguments. expect
+        to get back a list of dicts.
+        """
+
+        word = Word.get_words_by_category_language(language_id=2, category_id=1)
+
+        self.logger.debug("returned word: %s", word)
+
+        self.assertGreater(len(word), 0)
+
+
+    def test_get_words_by_no_language_category(self):
+        """ 
+        call the static fetch method and do not provide the language_id and category_id as arguments. expect
+        to get back error string.
+        """
+
+        word = Word.get_words_by_category_language()
+
+        self.logger.debug("returned word: %s", word)
+
+        self.assertEqual(word, "No language or category provided")
 
 
     def test_fetch_all(self):

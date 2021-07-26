@@ -32,24 +32,23 @@ class CategoryTest(unittest.TestCase):
         self.assertTrue(category.category == 'Day')
 
     
-    def test_save(self):
+    def test_save_category(self):
         """ provide a category name and expect a Category object to be returned. """
 
-        category = Category('Day')
-        saved_category = category.save()
+        saved_category = Category.save('Some Category')
 
         self.logger.debug("saved category: %s", saved_category)
 
-        self.assertIsInstance(saved_category, Category)
+        self.assertGreater(saved_category, 0)
 
 
     def test_fetch_category(self):
         """ 
         call the static fetch method and provide the id 1 as argument. expect
-        to get back an Category object.
+        to get back an Category dictionary.
         """
 
-        category = Category.fetch(id = 1)
+        category = Category.get_category_by_id(id = 1)
 
         self.logger.debug("returned category: %s", category)
 
@@ -62,7 +61,7 @@ class CategoryTest(unittest.TestCase):
         Category objects or an empty list.
         """
 
-        category_list = Category.fetch_all()
+        category_list = Category.get_all_categories()
 
         self.logger.debug("returned category list: %s", category_list)
 

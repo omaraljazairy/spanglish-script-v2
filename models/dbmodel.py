@@ -19,9 +19,9 @@ class DBModel:
 
 
 
-    def insert(self, sql:str, args: tuple) -> bool:
+    def insert(self, sql:str, args: tuple) -> int:
         ''' take a query string with args and executes an insert query. 
-        It will return a bool if successfully inserted, else False '''
+        It will return the last inserted_id if successfully '''
 
         self.logger.debug("query received: %s", sql)
         self.logger.debug("args received: %s", args)
@@ -31,13 +31,12 @@ class DBModel:
 
         try:
             cursor.execute(sql, args)
-            result = cursor.rowcount
+            result = cursor.lastrowid
             self.logger.debug("data returned: %s", result)
-            return bool(result)
+            return result
         except Exception as e:
             self.logger.error("%s", str(e))
             conn.rollback()
-            return False
         finally:
             cursor.close()
             self.logger.debug("cursur closed")
@@ -58,11 +57,10 @@ class DBModel:
             cursor.execute(sql, args)
             result = cursor.rowcount
             self.logger.debug("data returned: %s", result)
-            return bool(result)
+            return result
         except Exception as e:
             self.logger.error("%s", str(e))
             conn.rollback()
-            return False
         finally:
             cursor.close()
             self.logger.debug("cursur closed")
@@ -129,7 +127,6 @@ class DBModel:
         except Exception as e:
             self.logger.error("%s", str(e))
             conn.rollback()
-            return 0
         finally:
             cursor.close()
             self.logger.debug("cursur closed")

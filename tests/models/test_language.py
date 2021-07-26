@@ -35,15 +35,16 @@ class LanguageTest(unittest.TestCase):
 
     
     def test_save_language(self):
-        """ provide a language name iso-639-1 and expect a True to be returned. """
+        """ provide a language name iso-639-1 and expect the language_id to be returned. """
 
-        fr_language_name = 'French'
-        fr_language_code = 'FR'
-        saved_language = self.language.save(name=fr_language_name, code=fr_language_code)
+        de_language_name = 'Deutch'
+        de_language_code = 'DE'
+        saved_language = self.language.save(name=de_language_name, code=de_language_code)
 
         self.logger.debug("saved language: %s", saved_language)
 
-        self.assertEqual(type(saved_language), bool)
+        self.assertEqual(type(saved_language), int)
+        self.assertGreater(saved_language, 0)
 
 
     def test_delete_language(self):
@@ -60,11 +61,47 @@ class LanguageTest(unittest.TestCase):
         """ provide a language id with code and name and expect a boolean to
          be returned. """
 
-        updated_language = Language.update_language_by_id(id=2, code='NL', name='Nederlands')
+        updated_language = Language.update_language_by_id(id=2, code='IT', name='Italian')
 
         self.logger.debug("updated_language: %s", updated_language)
 
         self.assertEqual(type(updated_language), bool)
+        self.assertTrue(updated_language)
+
+    
+    def test_update_language_code_only(self):
+        """ provide a language id with code only and expect a True value to
+         be returned. """
+
+        updated_language = Language.update_language_by_id(id=2, code='NO')
+
+        self.logger.debug("updated_language: %s", updated_language)
+
+        self.assertEqual(type(updated_language), bool)
+        self.assertTrue(updated_language)
+
+    def test_update_language_name_only(self):
+        """ provide a language id with name only and expect a True value to
+         be returned. """
+
+        updated_language = Language.update_language_by_id(id=2, name='Swedish')
+
+        self.logger.debug("updated_language: %s", updated_language)
+
+        self.assertEqual(type(updated_language), bool)
+        self.assertTrue(updated_language)
+
+
+    def test_update_language_no_args_false(self):
+        """ provide a language id with no name or code and expect a False value to
+         be returned. """
+
+        updated_language = Language.update_language_by_id(id=2)
+
+        self.logger.debug("updated_language: %s", updated_language)
+
+        self.assertEqual(type(updated_language), bool)
+        self.assertFalse(updated_language)
 
 
     def test_get_language_by_id(self):
