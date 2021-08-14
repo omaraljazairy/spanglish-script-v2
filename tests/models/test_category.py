@@ -72,15 +72,16 @@ class CategoryTest(unittest.TestCase):
     def test_convert_db_dict_to_object(self):
         """ provide a list of category and expect to get back a Category object. """
 
-        data = [{
-            'category': 'foo',
-            'id' : 1,
-            'created': '2021-06-22 22:56:01'
+        data = [
+        {
+            'id': 1, 
+            'name': 'Verb', 
+            'created': datetime(2021, 7, 27, 7, 49, 59)
         },
         {
-            'category': 'bar',
-            'id' : 2,
-            'created': '2021-06-22 22:58:01'
+            'id': 2, 
+            'name': 'Day', 
+            'created': datetime(2021, 7, 27, 7, 49, 59)
         }]
 
         converted_categories = [Category.convert_dict_to_object(data=cat) for cat in data]
@@ -90,10 +91,17 @@ class CategoryTest(unittest.TestCase):
         self.assertIsInstance(converted_categories[0], Category)
 
 
-        
-        
+    def test_convert_db_dict_to_object_from_db(self):
+        """ provide a category from the database and expect to get back a Category object. """
 
+        category = Category.get_category_by_id(id = 1)
 
+        self.logger.debug("returned category from db: %s", category)
+
+        converted_category = Category.convert_dict_to_object(data=category)
+        self.logger.debug("converted_category: %s", converted_category)
+
+        self.assertIsInstance(converted_category, Category)
 
 
     @classmethod

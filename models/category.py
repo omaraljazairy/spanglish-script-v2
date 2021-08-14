@@ -26,8 +26,8 @@ class Category(BaseModel):
         super().__init__()
 
 
-    @staticmethod
-    def save(category:str) -> bool:
+    @classmethod
+    def save(cls, category:str) -> bool:
         """ 
         take the category name and saves it and returns True 
         if successfully added, otherwise False.
@@ -35,16 +35,16 @@ class Category(BaseModel):
 
         query = """
         INSERT IGNORE INTO {} (`name`) VALUES (%s)
-        """.format(Category.tables.CATEGORY)
+        """.format(cls.tables.CATEGORY)
         args = (category,)
-        result = Category.dbmodel.insert(sql=query, args=args)
+        result = cls.dbmodel.insert(sql=query, args=args)
        
         return result
 
 
     
-    @staticmethod
-    def get_category_by_id(id: int) -> Dict:
+    @classmethod
+    def get_category_by_id(cls, id: int) -> Dict:
         """ 
         takes an int and returns the Category dict if found, 
         otherwise it will return None. 
@@ -52,15 +52,16 @@ class Category(BaseModel):
 
         query = """ 
         SELECT * FROM {} WHERE id = %s;
-        """.format(Category.tables.CATEGORY)
+        """.format(cls.tables.CATEGORY)
 
         args = (id,)
-        data = Category.dbmodel.fetch(sql=query, args=args)
+        data = cls.dbmodel.fetch(sql=query, args=args)
 
         return data
 
-    @staticmethod
-    def get_all_categories() -> List[Dict]:
+
+    @classmethod
+    def get_all_categories(cls) -> List[Dict]:
         """ 
         takes no argument and returns a list of all Category dicts 
         if found, otherwise return an empty list. 
@@ -68,19 +69,20 @@ class Category(BaseModel):
 
         query = """ 
         SELECT * FROM {} WHERE 1;
-        """.format(Category.tables.CATEGORY)
+        """.format(cls.tables.CATEGORY)
 
         args = ()
-        data = Category.dbmodel.fetch_all(sql=query, args=args)
+        data = cls.dbmodel.fetch_all(sql=query, args=args)
 
         return data
 
 
-    @staticmethod
-    def convert_dict_to_object(data: dict) -> Category:
+    @classmethod
+    def convert_dict_to_object(cls, data: dict) -> Category:
         """ convert the database dict record into a Category object. """
 
-        category = data['category']
+        category = data['name']
         id = data['id']
-        created = datetime.strptime(data['created'], '%Y-%m-%d %H:%M:%S')
-        return Category(category=category, id=id, created=created)
+        created = datetime.strftime(data['created'], '%Y-%m-%d %H:%M:%S')
+        
+        return cls(category=category, id=id, created=created)

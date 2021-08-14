@@ -3,6 +3,7 @@ from models.basemodel import BaseModel
 from models.dbmodel import DBModel
 from models.category import Category
 from models.language import Language
+from exceptions.modelsexceptions import MissingArgs
 from dataclasses import dataclass
 from typing import Dict, TypeVar, List
 from datetime import datetime
@@ -18,10 +19,11 @@ class Word(BaseModel):
 
     word: str
     category: Category
-    language: Language = None
+    language: Language
     id: int = None
     created: datetime = datetime.now()
     dbmodel = DBModel()
+    logger = logging.getLogger('models')
 
 
     def __post_init__(self):
@@ -30,8 +32,8 @@ class Word(BaseModel):
         super().__init__()
 
 
-    @staticmethod
-    def save(word:str, language_id:int, category_id:int) -> int:
+    @classmethod
+    def save(cls, word:str, language_id:int, category_id:int) -> int:
         """ 
         takes a word, language_id and category_id and inserts them, returns 
         back the word_id.
@@ -39,15 +41,17 @@ class Word(BaseModel):
 
         query = """
         Insert IGNORE into {} (`word`, `language_id`, `category_id`) VALUES (%s, %s, %s)
-        """.format(Word.tables.WORD)
+        """.format(cls.tables.WORD)
         args = (word, language_id, category_id)
-        result = Word.dbmodel.insert(sql=query, args=args)
+        result = cls.dbmodel.insert(sql=query, args=args)
+        
+        cls.logger.debug("word saved: %s", result)
        
         return result
 
 
-    @staticmethod
-    def get_word_by_id(id:int) -> Dict:
+    @classmethod
+    def get_word_by_id(cls, id:int) -> Dict:
         """ 
         takes an int of the language_id and/or category_id returns the word dict if found, otherwise None
         will be returned. 
@@ -57,21 +61,21 @@ class Word(BaseModel):
         SELECT w.id as id, word, w.created as created, 
         language_id, l.name as language_name, `iso-639-1`, l.created as language_created, 
         category_id, c.name as category_name, c.created as category_created 
-        FROM Word AS w 
-        JOIN Category AS c ON (w.category_id = c.id) 
-        JOIN Language AS l ON (w.language_id = l.id) 
+        FROM {} AS w 
+        JOIN {} AS c ON (w.category_id = c.id) 
+        JOIN {} AS l ON (w.language_id = l.id) 
         WHERE w.id = %s;
-        """.format(Word.tables.WORD, Word.tables.CATEGORY, Word.tables.LANGUAGE)
+        """.format(cls.tables.WORD, cls.tables.CATEGORY, cls.tables.LANGUAGE)
 
         args = (id,)
 
-        word = Language.dbmodel.fetch(sql=query, args=args)
+        word = cls.dbmodel.fetch(sql=query, args=args)
         
         return word
 
 
-    @staticmethod
-    def get_words_by_category_language(language_id:int=None, category_id:int = None) -> List[Dict]:
+    @classmethod
+    def get_words_by_category_language(cls, language_id:int=None, category_id:int = None) -> List[Dict]:
         """ 
         takes an int of the language_id and/or category_id returns a list of word dicts if found, otherwise None
         will be returned. 
@@ -81,11 +85,11 @@ class Word(BaseModel):
         SELECT w.id as id, word, w.created as created, 
         language_id, l.name as language_name, `iso-639-1`, l.created as language_created, 
         category_id, c.name as category_name, c.created as category_created 
-        FROM Word AS w 
-        JOIN Category AS c ON (w.category_id = c.id) 
-        JOIN Language AS l ON (w.language_id = l.id) 
+        FROM {} AS w 
+        JOIN {} AS c ON (w.category_id = c.id) 
+        JOIN {} AS l ON (w.language_id = l.id) 
         WHERE
-        """.format(Word.tables.WORD, Word.tables.CATEGORY, Word.tables.LANGUAGE)
+        """.format(cls.tables.WORD, cls.tables.CATEGORY, cls.tables.LANGUAGE)
         where_clause = ""
         args = []
         if language_id and category_id:
@@ -106,72 +110,75 @@ class Word(BaseModel):
         query = query + where_clause
         # args = tuple(args)
 
-        word = Language.dbmodel.fetch_all(sql=query, args=args)
+        word = cls.dbmodel.fetch_all(sql=query, args=args)
         
         return word
         
 
-    @staticmethod
-    def fetch_all() -> List[Dict]:
-        """ 
-        takes no arguments and returns a list of Word dict objects or 
-        empty list. 
-        """
-
-        words =  [
-            {
-                'word': 'Hola',
-                'id': 1,
-                'created': '2021-06-22 22:56:01',
-                'category': {
-                    'category': 'foo',
-                    'id' : 1,
-                    'created': '2021-06-22 22:56:01'
-                },
-                'language': {
-                    'name': 'Spanish',
-                    'id' : 2,
-                    'code': 'ES',
-                    'created': '2021-06-22 22:58:01'
-                }
-            },
-            {
-                'word': 'dia',
-                'id': 2,
-                'created': '2021-06-22 22:57:01',
-                'category': {
-                    'category': 'bar',
-                    'id' : 2,
-                    'created': '2021-06-22 22:58:01'
-                },
-                'language': {
-                    'name': 'English',
-                    'id' : 1,
-                    'code': 'EN',
-                    'created': '2021-06-22 22:56:01'
-                }
-            }]
+    @classmethod
+    def update_word_by_id(cls, id:int, **kwargs) -> int:
+        """ update a word by providing its id. the updated values can be the
+        language_id and/or category_id. If non is provided, the update will 
+        not be executed. """
 
 
-        return words
+        list_args = []
+        set_query_clause = "" # create an empty string to start with. 
+
+        expected_keys = {
+            'word': " `word` = %s",
+            'language_id': " `language_id` = %s",
+            'category_id': " `category_id` = %s"
+        }
+
+        # loop through the expected keys in the kwargs. 
+        # if the keys is found and has a value, use it's value to create
+        # the set_query_clause by append the value to it.         
+        for key in expected_keys:
+            if key in kwargs.keys() and kwargs[key]:
+                list_args.append(kwargs[key])
+                set_query_clause = set_query_clause + expected_keys[key] if len(list_args) == 1 else set_query_clause + "," + expected_keys[key]
+
+        # throw an exception if there no args. 
+        if not list_args:
+            raise MissingArgs(required_args=tuple(expected_keys.keys()))
 
 
-    @staticmethod
-    def convert_dict_to_object(data: dict) -> Word:
+        list_args.append(id) # add the id into the args list
+
+        query = """
+        UPDATE {} 
+        SET {}
+        WHERE id = %s;
+        """.format(cls.tables.WORD, set_query_clause)
+
+        args = tuple(list_args) # convert the list to a tuple
+        cls.logger.debug("query: %s", query)
+        cls.logger.debug("args: %s", args)
+
+        word = cls.dbmodel.update(sql=query, args=args)
+        
+        return word
+
+
+    @classmethod
+    def convert_dict_to_object(cls, data: dict) -> Word:
         """ convert the database record as dict into a Word object. """
 
         word = data['word']
         id = data['id']
-        created = datetime.strptime(data['created'], '%Y-%m-%d %H:%M:%S')
-        category = data['category']['category']
-        language_id = data['language']['id']
-        language_name = data['language']['name']
-        language_code = data['language']['code']
-        language_created = datetime.strptime(data['language']['created'], '%Y-%m-%d %H:%M:%S')
-        category_id = data['category']['id']
-        category_created = datetime.strptime(data['category']['created'], '%Y-%m-%d %H:%M:%S')
+        created = datetime.strftime(data['created'], '%Y-%m-%d %H:%M:%S')
 
-        return Word(
+        category = data['category_name']
+        category_id = data['category_id']
+        category_created = datetime.strftime(data['category_created'], '%Y-%m-%d %H:%M:%S')
+
+        language_id = data['language_id']
+        language_name = data['language_name']
+        language_code = data['iso-639-1']
+        language_created = datetime.strftime(data['language_created'], '%Y-%m-%d %H:%M:%S')
+
+        return cls(
             word=word, id=id, created=created, 
             category=Category(category=category, id=category_id, created=category_created),
             language=Language(name=language_name, code=language_code, id=language_id, created=language_created)

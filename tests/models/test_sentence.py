@@ -1,3 +1,5 @@
+from models.language import Language
+from exceptions.modelsexceptions import MissingArgs
 import unittest
 import logging
 from models.sentence import Sentence
@@ -12,6 +14,7 @@ class SentenceModelTest(unittest.TestCase):
         
         cls.logger = logging.getLogger('test')
         cls.category = Category(category='greeting', id=1, created=datetime.now())
+        cls.language = Language(name='Spanish', code='ES', id=1, created=datetime.now())
         cls.logger.info("Setup %s Model", cls.__name__)
         
 
@@ -38,40 +41,152 @@ class SentenceModelTest(unittest.TestCase):
     def test_save(self):
         """ provide a sentence name and expect a Sentence object to be returned. """
 
-        sentence = Sentence(sentence='que dia es hoy', category=self.category)
-        saved_sentence = sentence.save()
+        saved_sentence = Sentence.save(
+            sentence='como te llamas ?', 
+            category_id=self.category.id,
+            language_id=self.language.id
+            )
 
         self.logger.debug("saved sentence: %s", saved_sentence)
 
-        self.assertIsInstance(saved_sentence, Sentence)
+        self.assertGreater(saved_sentence, 0)
 
 
-    def test_fetch_sentence(self):
+    def test_get_sentence_by_id(self):
         """ 
-        call the static fetch method and provide the id 1 as argument. expect
+        call the classmethod fetch method and provide the id 1 as argument. expect
         to get back an Sentence object.
         """
 
-        sentence = Sentence.fetch(id = 1)
+        sentence = Sentence.get_sentence_by_id(id = 1)
 
         self.logger.debug("returned sentence: %s", sentence)
 
         self.assertIsInstance(sentence, dict)
-        # self.assertIsInstance(sentence.category, Category)
 
 
-    def test_fetch_all(self):
+    def test_get_sentence_by_category_language(self):
         """ 
-        call the static fetch_all method. expect to get back a list of 
-        Sentence objects or an empty list.
+        call the classmethod test_get_sentence_by_category_language. prvide 
+        the language and category expect to get back a list of Sentence dict 
+        or an empty list.
         """
 
-        sentence_list = Sentence.fetch_all()
+        sentence_list = Sentence.get_sentence_by_category_language(language_id=2, category_id=2)
 
         self.logger.debug("returned sentence list: %s", sentence_list)
 
         self.assertEqual(type(sentence_list), list)
         self.assertTrue(len(sentence_list) > 0)
+
+    
+    def test_get_sentence_by_language_only(self):
+        """ 
+        call the classmethod test_get_sentence_by_category_language. provide 
+        the language and expect to get back a list of Sentence dict 
+        or an empty list.
+        """
+
+        sentence_list = Sentence.get_sentence_by_category_language(language_id=2)
+
+        self.logger.debug("returned sentence list: %s", sentence_list)
+
+        self.assertEqual(type(sentence_list), list)
+        self.assertTrue(len(sentence_list) > 0)
+
+
+    def test_get_sentence_by_category_only(self):
+        """ 
+        call the classmethod test_get_sentence_by_category_language. provide 
+        the category and expect to get back a list of Sentence dict.
+        """
+
+        sentence_list = Sentence.get_sentence_by_category_language(category_id=2)
+
+        self.logger.debug("returned sentence list: %s", sentence_list)
+
+        self.assertEqual(type(sentence_list), list)
+        self.assertTrue(len(sentence_list) > 0)
+
+
+    def test_get_sentence_by_no_language_category(self):
+        """ 
+        call the classmethod test_get_sentence_by_category_language. provide 
+        no language or category and expect to get back a list of Sentence dict.
+        """
+
+        sentence_list = Sentence.get_sentence_by_category_language()
+
+        self.logger.debug("returned sentence list: %s", sentence_list)
+
+        self.assertEqual(type(sentence_list), list)
+        self.assertTrue(len(sentence_list) > 0)
+
+
+    def test_update_sentence_by_id_language_category(self):
+        """ provide a language_id and category_id to the sentence with id 1, 
+        expect it to be changed. 
+        """
+
+        sentence = 'cuando amigo cuando ?'
+        language_id = 1
+        category_id = 2
+        sentence_id = 1
+
+        updated_sentence = Sentence.update_sentence_by_id(
+            id=sentence_id, 
+            sentence=sentence,
+            language_id=language_id, 
+            category_id=category_id
+        )
+
+        self.logger.debug("upated_sentence: %s", updated_sentence)
+
+        self.assertGreater(updated_sentence, 0)
+
+
+    def test_update_sentence_by_category_id(self):
+        """ provide a category_id to the sentence with id 1, 
+        expect it to be changed. 
+        """
+
+        category_id = 1
+        sentence_id = 1
+
+        updated_sentence = Sentence.update_sentence_by_id(
+            id=sentence_id, 
+            category_id=category_id
+        )
+
+        self.logger.debug("upated_sentence: %s", updated_sentence)
+
+        self.assertGreater(updated_sentence, 0)
+
+
+    def test_update_sentence_by_language_id(self):
+        """ provide a language_id to the sentence with id 1, 
+        expect it to be changed. 
+        """
+
+        language_id = 2
+        sentence_id = 1
+
+        updated_sentence = Sentence.update_sentence_by_id(
+            id=sentence_id, 
+            language_id=language_id
+        )
+
+        self.logger.debug("upated_sentence: %s", updated_sentence)
+
+        self.assertGreater(updated_sentence, 0)
+
+
+    def test_update_sentence_by_missing_kwargs_exception(self):
+        """ call the update sentence without providing any kwargs. 
+        """
+
+        with self.assertRaises(MissingArgs):
+            Sentence.update_sentence_by_id(id=1)
 
 
     def test_convert_db_dict_to_object(self):

@@ -15,12 +15,16 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/app.log',
             'formatter': 'standard',
+            'maxBytes': 1048576, 
+            'backupCount': 5
         },
         'test': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/test.log',
             'formatter': 'standard',
+            'maxBytes': 1048576, 
+            'backupCount': 5
         },
         'console': {
             'level': 'INFO',
@@ -30,7 +34,7 @@ LOGGING = {
     },
     'loggers': {
         'test': {
-            'handlers': ['test'],
+            'handlers': ['file'], # keep test and app in one log
             'level': 'DEBUG',
             'propagate': True,
         },

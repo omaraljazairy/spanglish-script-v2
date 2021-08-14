@@ -2,6 +2,7 @@ import unittest
 import logging
 from datetime import datetime
 from models.language import Language
+from exceptions.modelsexceptions import MissingArgs
 
 class LanguageTest(unittest.TestCase):
 
@@ -65,8 +66,7 @@ class LanguageTest(unittest.TestCase):
 
         self.logger.debug("updated_language: %s", updated_language)
 
-        self.assertEqual(type(updated_language), bool)
-        self.assertTrue(updated_language)
+        self.assertEqual(updated_language, 1)
 
     
     def test_update_language_code_only(self):
@@ -74,11 +74,10 @@ class LanguageTest(unittest.TestCase):
          be returned. """
 
         updated_language = Language.update_language_by_id(id=2, code='NO')
-
         self.logger.debug("updated_language: %s", updated_language)
 
-        self.assertEqual(type(updated_language), bool)
-        self.assertTrue(updated_language)
+        self.assertEqual(updated_language, 1)
+
 
     def test_update_language_name_only(self):
         """ provide a language id with name only and expect a True value to
@@ -88,20 +87,15 @@ class LanguageTest(unittest.TestCase):
 
         self.logger.debug("updated_language: %s", updated_language)
 
-        self.assertEqual(type(updated_language), bool)
-        self.assertTrue(updated_language)
+        self.assertEqual(updated_language, 1)
 
 
     def test_update_language_no_args_false(self):
         """ provide a language id with no name or code and expect a False value to
          be returned. """
 
-        updated_language = Language.update_language_by_id(id=2)
-
-        self.logger.debug("updated_language: %s", updated_language)
-
-        self.assertEqual(type(updated_language), bool)
-        self.assertFalse(updated_language)
+        with self.assertRaises(MissingArgs):
+            Language.update_language_by_id(id=2)
 
 
     def test_get_language_by_id(self):
@@ -136,17 +130,18 @@ class LanguageTest(unittest.TestCase):
         list of Language objects. 
         """
 
-        data = [{
-            'name': 'English',
-            'id' : 1,
-            'code': 'EN',
-            'created': '2021-06-22 22:56:01'
+        data = [
+        {
+            'id': 1, 
+            'name': 'English', 
+            'iso-639-1': 'EN', 
+            'created': datetime(2021, 7, 27, 7, 58, 12)
         },
         {
             'name': 'Spanish',
             'id' : 2,
-            'code': 'ES',
-            'created': '2021-06-22 22:58:01'
+            'iso-639-1': 'ES',
+            'created': datetime(2021, 7, 27, 8, 58, 17)
         }]
 
         converted_languages = [Language.convert_dict_to_object(data=lan) for lan in data]
@@ -155,6 +150,20 @@ class LanguageTest(unittest.TestCase):
         self.assertAlmostEqual(len(converted_languages), 2)
         self.assertIsInstance(converted_languages[0], Language)
 
+
+    def test_convert_db_dict_to_object_from_db(self):
+        """ provide a language from the database and expect to get back a 
+        Language objects. 
+        """
+
+        language = Language.get_language_by_id(id = 1)
+
+        self.logger.debug("returned language: %s", language)
+
+        converted_language = Language.convert_dict_to_object(data=language)
+        self.logger.debug("converted_language: %s", converted_language)
+
+        self.assertIsInstance(converted_language, Language)
 
 
     @classmethod
