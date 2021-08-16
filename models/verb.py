@@ -1,3 +1,6 @@
+import logging
+from enums.dbenums import VerbTense
+from exceptions.modelsexceptions import MissingArgs
 from models.basemodel import BaseModel
 from models.dbmodel import DBModel
 from dataclasses import dataclass
@@ -25,51 +28,169 @@ class Verb(BaseModel):
     vosotros: str = None
     ustedes: str = None
     id: int = None
-    tense: str = 'present'
+    tense: str = VerbTense.PRESENT_PERFECT
     created: datetime = datetime.now()
+    dbmodel = DBModel()
+    logger = logging.getLogger('models')
 
 
     def __post_init__(self):
         """This is only for dataclasses. It will be executed after the 
         automatic default init """
         super().__init__()
-        self.dbase = DBModel()
 
-    
-    def save(self) -> int:
+
+    @classmethod
+    def save(
+        cls, 
+        word_id:int, 
+        yo:str=None, 
+        tu:str=None, 
+        usted:str=None, 
+        nosotros:str=None, 
+        vosotros:str=None, 
+        ustedes:str=None, 
+        tense:str=VerbTense.PRESENT_PERFECT.value) -> int:
         """ 
         takes the verb object returns the generated verb if successful, 
         otherwise None will be returned.
         """
 
-        return self
+        query = """
+        INSERT INTO {} 
+        (
+            `word_id`, `yo`, `tu`, `usted`, `nosotros`, `vosotros`, `ustedes`, `tense`
+        ) 
+        VALUES (
+            %s, %s, %s, %s, %s, %s, %s, %s
+        )
+        """.format(cls.tables.VERB)
+        
+        args = (word_id, yo, tu, usted, nosotros, vosotros, ustedes, tense)
+        result = cls.dbmodel.insert(sql=query, args=args)
+        
+        cls.logger.debug("verb saved: %s", result)
+       
+        return result
 
 
-    @staticmethod
-    def fetch(id: int) -> Dict:
+
+    @classmethod
+    def get_verb_by_id(cls, verb_id: int = None, word_id:int = None) -> Dict:
         """ 
-        takes an int of the verbId and calls create an query with one argument,
-        verb_id. It will returns the verb object as a dict type if found, otherwise None
+        takes an int of the verbId or the wordId and fetchs the verb by calling the 
+        method with a query and one argument, verb_id or word_id. 
+        It will returns the verb object as a dict type if found, otherwise None
         will be returned. 
+        If no verb_id or word_id were provided, a MissingArgs exception will be raised.
         """
 
-        query = """select * from Verb as v join Word as w on (v.word_id = w.id) join Category as c on (w.category_id = c.id) join Language as l on (w.language_id = l.id) where v.id = ?"""
-        args = [id]
+        if not verb_id and not word_id:
+            raise MissingArgs(required_args=('verb_id', 'word_id'))
 
-        # data = Verb.dbase.fetch()
+        where_clause = 'v.id = %s' if verb_id else 'v.word_id = %s'
+        args = (verb_id,) if verb_id else (word_id,)
+
+        query = """
+        SELECT * FROM {} as v 
+        JOIN {} as w on (v.word_id = w.id) 
+        JOIN {} as c on (w.category_id = c.id) 
+        JOIN {} as l on (w.language_id = l.id) 
+        WHERE  """.format(
+            cls.tables.VERB, 
+            cls.tables.WORD, 
+            cls.tables.CATEGORY, 
+            cls.tables.LANGUAGE
+        )
+        
+        query += where_clause
+
+        verb = cls.dbmodel.fetch(sql=query, args=args)
+        cls.logger.debug("verb returend: %s", verb)
+
+        return verb
+
+    
+    @classmethod
+    def get_all_verbs_by_word_or_all(cls, word:str=None) -> List[dict]:
+        """ take a word that will have the Like in it's where clause. So the 
+        word can be '%foo', '%foo%' or 'foo%'. The where clause will search 
+        using LIKE in the where clause. If the word is not provided, all 
+        verbs will be returned. The returned object will be a list of 
+        dictionaries. """
+
+        where_clause = 'w.word like %s' if word else '%s'
+        args = (word,) if word else (1,)
+
+        query = """
+        SELECT * FROM {} as v 
+        JOIN {} as w on (v.word_id = w.id) 
+        JOIN {} as c on (w.category_id = c.id) 
+        JOIN {} as l on (w.language_id = l.id) 
+        WHERE  """.format(
+            cls.tables.VERB, 
+            cls.tables.WORD, 
+            cls.tables.CATEGORY, 
+            cls.tables.LANGUAGE
+        )
+        
+        query += where_clause
+
+        verb = cls.dbmodel.fetch_all(sql=query, args=args)
+        cls.logger.debug("verbs returend: %s", verb)
+
+        return verb
 
 
-        return Verb(id=id, word=Word(id=2, word='ir', category=Category(category='verb', id=2, created=datetime.now()), created=datetime.now()), yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now())
-
-
-    @staticmethod
-    def fetch_all() -> List[Dict]:
-        """ 
-        takes no arguments and returns a list of Verb objects or 
-        empty list. 
+    @classmethod
+    def update_verb_by_word_id(cls, word_id:int, **kwargs) -> int:
+        """ update a verb by providing the word_id. the updated values 
+        can be yo,tu,usted,nosotros,vosotros,ustedes,tense. If non is provided, 
+        the update will not be executed. 
         """
 
-        return [Verb(id=id, word=Word(id=2, word='ir', category=Category(category='verb', id=2, created=datetime.now()), created=datetime.now()), yo='voy', tu='vas', usted='va', nosotros='vamos', vosotros='vais', ustedes='van', tense='persent', created=datetime.now()),]
+
+        list_args = []
+        set_query_clause = "" # create an empty string to start with. 
+
+        possible_keys = {
+            'yo': " `yo` = %s",
+            'tu': " `tu` = %s",
+            'usted': " `usted` = %s",
+            'nosotros': "`nosotros` = %s",
+            'vosotros': "`vosotros` = %s",
+            'ustedes': "`ustedes` = %s",
+            'tense': "`tense` = %s"
+        }
+
+        # loop through the expected keys in the kwargs. 
+        # if the keys is found and has a value, use it's value to create
+        # the set_query_clause by append the value to it.         
+        for key in possible_keys:
+            if key in kwargs.keys() and kwargs[key]:
+                list_args.append(kwargs[key])
+                set_query_clause = set_query_clause + possible_keys[key] if len(list_args) == 1 else set_query_clause + "," + possible_keys[key]
+
+        # throw an exception if there no args. 
+        if not list_args:
+            raise MissingArgs(required_args=tuple(possible_keys.keys()))
+
+
+        list_args.append(word_id) # add the id into the args list
+
+        query = """
+        UPDATE {} 
+        SET {}
+        WHERE word_id = %s;
+        """.format(cls.tables.VERB, set_query_clause)
+
+        args = tuple(list_args) # convert the list to a tuple
+        cls.logger.debug("query: %s", query)
+        cls.logger.debug("args: %s", args)
+
+        result = cls.dbmodel.update(sql=query, args=args)
+        
+        return result
 
 
     @staticmethod

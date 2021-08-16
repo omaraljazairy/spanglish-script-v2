@@ -12,14 +12,23 @@ def load_word():
         """
     values = [
         (
-            'Ir', '2', '1'
+            'Ir', 2, 1
         ),
         (
-            'Lunes', '2', '2'
+            'Lunes', 2, 2
         ),
         (
-            'Hola', '2', '3'
-        )
+            'Hola', 2, 3
+        ),
+        (
+            'Ver', 2, 1
+        ),
+        (
+            'Comer', 2, 1
+        ),
+        (
+            'Saber', 2, 1
+        ),                
     ]
 
     return {

@@ -1,3 +1,4 @@
+from enums.dbenums import VerbTense
 """ fixtures that return an sql statement with a list of values to be inserted."""
 
 def load_verb():
@@ -13,8 +14,14 @@ def load_verb():
         """
     values = [
         (
-            'simple present', 1, 'voy', 'vas', 'va', 'vamos', 'vais', 'van'
+            VerbTense.PRESENT_PERFECT.value, 1, 'voy', 'vas', 'va', 'vamos', 'vais', 'van'
         ),
+        (
+            VerbTense.PRESENT_PERFECT.value, 3, 'vee', 'ves', 've', 'vamos', 'veis', 'ven'
+        ),
+        (
+            VerbTense.PRESENT_PERFECT.value, 4, 'como', 'comes', 'come', 'comemos', 'comeis', 'comen'
+        ),                
     ]
 
     return {

@@ -1,4 +1,5 @@
 import unittest
+from exceptions.modelsexceptions import MissingArgs
 import logging
 from datetime import datetime
 from models.translation import Category
@@ -16,11 +17,40 @@ class TranslationTest(unittest.TestCase):
         cls.logger = logging.getLogger('test')
         cls.logger.info("Setup %s Model", cls.__name__)
                 
-        cls.word = Word(id=1, word='Hola', category=Category(category='greeting', id=1, created=datetime.now()), created=datetime.now())
+        cls.sentence = Sentence(
+            id=1, 
+            sentence='Hola amigo', 
+            category=Category(
+                category='greeting', 
+                id=1, 
+                created=datetime.now()
+            ), 
+            created=datetime.now()
+        )
 
-        cls.sentence = Sentence(id=1, sentence='Hola amigo', category=Category(category='greeting', id=1, created=datetime.now()), created=datetime.now())
-
-        cls.language = Language(name='English', code='EN', id=1, created=datetime.now())
+        cls.language = Language(
+            name='English', 
+            code='EN', 
+            id=1, 
+            created=datetime.now()
+        )
+        
+        cls.word = Word(
+            id=1, 
+            word='Hola', 
+            category=Category(
+                category='greeting', 
+                id=1, 
+                created=datetime.now()
+            ), 
+            created=datetime.now(),
+            language=Language(
+                name="Spanish",
+                code="ES",
+                id=1,
+                created=datetime.now()
+            )
+        )
 
 
         cls.translation_word = Translation(id=1, translation='Hello', language=cls.language, word=cls.word, created=datetime.now())
@@ -47,42 +77,108 @@ class TranslationTest(unittest.TestCase):
         self.assertTrue(tranlsation.word.id == 1)
 
     
-    def test_save(self):
-        """ provide a translation name and expect a Translation object to be returned. """
+    def test_save_translated_word(self):
+        """ provide a word_id with a language_id and a translation.
+        expect a 1 to be returned. """
 
-        translation = self.translation_sentence
-        saved_translation = translation.save()
+        saved_translation = Translation.save(
+            word_id=4,
+            language_id=1,
+            translation='see'
+            )
 
         self.logger.debug("saved translation: %s", saved_translation)
 
-        self.assertIsInstance(saved_translation, int)
+        self.assertEqual(saved_translation, 1)
 
 
-    def test_fetch_translation(self):
-        """ 
-        call the static fetch method and provide the id 1 as argument. expect
-        to get back an Translation object.
-        """
+    def test_save_translated_sentence(self):
+        """ provide a sentence_id with a language_id and a translation.
+        expect a 1 to be returned. """
 
-        translation = Translation.fetch(id = 1)
+        saved_translation = Translation.save(
+            sentence_id=3,
+            language_id=2,
+            translation='what is your name ?'
+            )
+
+        self.logger.debug("saved translation: %s", saved_translation)
+
+        self.assertEqual(saved_translation, 1)
+
+
+    def test_save_translated_exception(self):
+        """ provide no word_id and no sentence_id. Expect a MissingArgs 
+        exception to be thrown. """
+
+        with self.assertRaises(MissingArgs):
+            saved_translation = Translation.save(
+                language_id=2,
+                translation='what is your name ?'
+            )
+            self.logger.debug("saved translation: %s", saved_translation)
+
+
+    def test_get_translation_by_word_id(self):
+        """ provide a word_id and expect back a translation dictionary. """
+
+        translation = Translation.get_translation_by_id(word_id=1)
 
         self.logger.debug("returned translation: %s", translation)
 
         self.assertIsInstance(translation, dict)
 
 
-    def test_fetch_all(self):
-        """ 
-        call the static fetch_all method. expect to get back a list of 
-        Translation objects or an empty list.
+    def test_get_translation_by_sentence_id(self):
+        """ provide a sentence_id and expect back a translation dictionary. """
+
+        translation = Translation.get_translation_by_id(sentence_id=1)
+
+        self.logger.debug("returned translation: %s", translation)
+
+        self.assertIsInstance(translation, dict)
+
+
+    def test_get_translation_by_id_exception(self):
+        """ provide no word_id and sentence_id and expect 
+        back MissingArgs exception to be thrown. """
+
+        with self.assertRaises(MissingArgs):
+            Translation.get_translation_by_id()
+
+    
+    def test_update_translation_by_id(self):
+        """update a word translation by providing the translation_id and translation. expect back
+        1 to be returned.
         """
 
-        translation_list = Translation.fetch_all()
+        translation = Translation.update_translation_by_id(id=1, translation='flo')
 
-        self.logger.debug("returned translation list: %s", translation_list)
+        self.logger.debug("returned translation: %s", translation)
 
-        self.assertEqual(type(translation_list), list)
-        self.assertTrue(len(translation_list) > 0)
+        self.assertEqual(translation, 1)
+
+
+    def test_update_translation_by_sentence_id(self):
+        """update a word translation by providing the translation_id and translation. expect back
+        1 to be returned.
+        """
+
+        translation = Translation.update_translation_by_id(id=1, translation='why amigo why ?')
+
+        self.logger.debug("returned translation: %s", translation)
+
+        self.assertEqual(translation, 1)
+
+
+    def test_update_translation_exception(self):
+        """provide translation_id without translation or language. 
+        Expect a MissingArgs exception to be thrown.
+        """
+
+        with self.assertRaises(MissingArgs):
+            Translation.update_translation_by_id(id=1)
+
 
     
     def test_convert_db_dict_to_object(self):
